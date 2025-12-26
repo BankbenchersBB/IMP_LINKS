@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Quick Access Portal</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --secondary: #475569;
+            --accent: #60a5fa;
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: rgba(15, 23, 42, 0.08);
+            --shadow-hover: rgba(15, 23, 42, 0.15);
+            --success: #10b981;
+            --gradient-1: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            --gradient-2: linear-gradient(135deg, #475569 0%, #64748b 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            color: white;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Header */
+        header {
+            background: var(--bg-card);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 12px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.6s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;  /* vertical center */
+            gap: 10px;
+        }
+
+        .logo-img {
+            height: 40px;
+            /* size control */
+            width: auto;
+        }
+
+        .logo-text {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1f4ed8;
+            /* optional – blue like screenshot */
+            line-height: 1;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 0.6rem 1.2rem;
+            border: 2px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-dark);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .nav-btn.visible {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-hover);
+        }
+
+        /* Search Bar */
+        .search-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            animation: fadeIn 0.8s ease 0.2s both;
+        }
+
+        .search-wrapper {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem 1rem 3.5rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            background: var(--bg-card);
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 1.2rem;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Page Titles */
+        .page-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            color: var(--text-dark);
+            animation: fadeIn 0.8s ease 0.3s both;
+        }
+
+        .page-subtitle {
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-top: -2rem;
+            margin-bottom: 3rem;
+            animation: fadeIn 0.8s ease 0.4s both;
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            animation: fadeIn 0.8s ease 0.4s both;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            animation: scaleIn 0.5s ease both;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-1);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px var(--shadow-hover);
+            border-color: var(--primary-light);
+        }
+
+        .card-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--gradient-1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.4s ease;
+        }
+
+        .card:hover .card-icon {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-dark);
+        }
+
+        .card-description {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* Animation Delays for Cards */
+        .card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .card:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Links Display */
+        .links-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            animation: fadeIn 0.8s ease 0.4s both;
+        }
+
+        .link-item {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            animation: scaleIn 0.5s ease both;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .link-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-1);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .link-item:hover::before {
+            transform: scaleX(1);
+        }
+
+        .link-item:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px var(--shadow-hover);
+        }
+
+        .link-number {
+            width: 56px;
+            height: 56px;
+            background: var(--gradient-1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .link-item:hover .link-number {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .link-content {
+            flex: 1;
+        }
+
+        .link-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .link-description {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* Animation delays for links */
+        .link-item:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .link-item:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .link-item:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .link-item:nth-child(4) {
+            animation-delay: 0.25s;
+        }
+
+        .link-item:nth-child(5) {
+            animation-delay: 0.3s;
+        }
+
+        .link-item:nth-child(6) {
+            animation-delay: 0.35s;
+        }
+
+        .link-item:nth-child(7) {
+            animation-delay: 0.4s;
+        }
+
+        .link-item:nth-child(8) {
+            animation-delay: 0.45s;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Search Results */
+        .search-results {
+            display: none;
+            max-width: 900px;
+            margin: 2rem auto;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-info {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .no-results-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem 1.5rem;
+            }
+
+            .logo {
+                font-size: 1.4rem;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+                margin-bottom: 2rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .search-container {
+                padding: 0 1.5rem;
+            }
+
+            .nav-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-btn {
+                flex: 1;
+                max-width: 150px;
+            }
+
+            /* Links grid - 2 columns on tablet */
+            .links-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.25rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 1.75rem;
+            }
+
+            .card-title {
+                font-size: 1.2rem;
+            }
+
+            /* Links grid - 1 column on mobile */
+            .links-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .link-item {
+                padding: 1.5rem;
+            }
+
+            .link-number {
+                width: 48px;
+                height: 48px;
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Error Message */
+        .error-message {
+            background: #fee2e2;
+            border: 2px solid #fca5a5;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            color: #991b1b;
+            max-width: 600px;
+            margin: 3rem auto;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .error-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .error-text {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-text {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader"></div>
+        <div class="loading-text">Loading Dashboard...</div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <img src="logo.png" alt="My Logo" class="logo-img">
+                <span class="logo-text">BankBenchers</span>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn" id="homeBtn" onclick="goHome()">🏠 Home</button>
+                <button class="nav-btn" id="backBtn" onclick="goBack()">← Back</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search Bar -->
+    <div class="search-container" id="searchContainer">
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="searchInput"
+                placeholder="Search for links, categories, or topics..." autocomplete="off">
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Home Page -->
+        <div class="page active" id="homePage">
+            <h1 class="page-title">Welcome to Dashboard</h1>
+            <p class="page-subtitle">Select a category to access your resources</p>
+            <div class="grid" id="mainGrid"></div>
+        </div>
+
+        <!-- Sub-buttons Page -->
+        <div class="page" id="subButtonsPage">
+            <h1 class="page-title" id="subPageTitle"></h1>
+            <div class="grid" id="subButtonsGrid"></div>
+        </div>
+
+        <!-- Links Page -->
+        <div class="page" id="linksPage">
+            <h1 class="page-title" id="linksPageTitle"></h1>
+            <div class="links-container" id="linksContainer"></div>
+        </div>
+
+        <!-- Search Results Page -->
+        <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <script>
+        // Configuration
+        const SHEET_ID = '11PXhovAYWLtLZzvx8czTXXRZExDqb6utyP5CbRXGhM8';
+        const SHEET_NAME = 'Dashboard';
+        const API_KEY = ''; // Not needed if sheet is public
+
+        // State Management
+        let dashboardData = [];
+        let navigationStack = [];
+        let allLinks = [];
+
+        // Category Icons
+        const categoryIcons = {
+            'Data Analyst': '📊',
+            'HR & Admin': '👥',
+            'Developers': '💻',
+            'Important Files': '📁',
+            'Extra': '⭐'
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadData();
+            setupSearch();
+        });
+
+        // Load Data from Google Sheets
+        async function loadData() {
+            try {
+                const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
+
+                const response = await fetch(url);
+                const text = await response.text();
+
+                // Parse Google Sheets JSON response
+                const json = JSON.parse(text.substring(47).slice(0, -2));
+                const rows = json.table.rows;
+
+                // Process data
+                dashboardData = rows.slice(1).map(row => ({
+                    category: row.c[0]?.v || '',
+                    subCategory: row.c[1]?.v || '',
+                    linkName: row.c[2]?.v || '',
+                    linkUrl: row.c[3]?.v || '',
+                    description: row.c[4]?.v || ''
+                })).filter(item => item.category && item.linkName && item.linkUrl);
+
+                // Store all links for search
+                allLinks = dashboardData;
+
+                // Render main page
+                renderMainPage();
+
+                // Hide loading screen
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').classList.add('hidden');
+                }, 500);
+
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showError('Failed to load data. Please make sure the Google Sheet is publicly accessible.');
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }
+        }
+
+        // Render Main Page
+        function renderMainPage() {
+            const mainGrid = document.getElementById('mainGrid');
+            mainGrid.innerHTML = '';
+
+            // Get unique categories
+            const categories = [...new Set(dashboardData.map(item => item.category))];
+
+            categories.forEach(category => {
+                const card = createCard(category, categoryIcons[category] || '📌', getCategoryDescription(category));
+                card.onclick = () => handleCategoryClick(category);
+                mainGrid.appendChild(card);
+            });
+        }
+
+        // Create Card Element
+        function createCard(title, icon, description) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="card-icon">${icon}</div>
+                <div class="card-title">${title}</div>
+                <div class="card-description">${description}</div>
+            `;
+            return card;
+        }
+
+        // Get Category Description
+        function getCategoryDescription(category) {
+            const descriptions = {
+                'Data Analyst': 'Access onboarding materials and analytics resources',
+                'HR & Admin': 'Human resources and administrative documents',
+                'Developers': 'Development resources, daily sheets, and deployment status',
+                'Important Files': 'Critical documents including translations and circulars',
+                'Extra': 'Additional resources and notice board'
+            };
+            return descriptions[category] || 'Quick access to resources';
+        }
+
+        // Handle Category Click
+        function handleCategoryClick(category) {
+            const categoryData = dashboardData.filter(item => item.category === category);
+            const hasSubCategories = categoryData.some(item => item.subCategory);
+
+            if (hasSubCategories) {
+                // Show sub-buttons page
+                renderSubButtonsPage(category, categoryData);
+            } else {
+                // Show links directly
+                renderLinksPage(category, null, categoryData);
+            }
+
+            navigationStack.push('home');
+            updateNavigation();
+        }
+
+        // Render Sub-buttons Page
+        function renderSubButtonsPage(category, data) {
+            const subButtonsPage = document.getElementById('subButtonsPage');
+            const subPageTitle = document.getElementById('subPageTitle');
+            const subButtonsGrid = document.getElementById('subButtonsGrid');
+
+            subPageTitle.textContent = category;
+            subButtonsGrid.innerHTML = '';
+
+            // Get unique sub-categories
+            const subCategories = [...new Set(data.filter(item => item.subCategory).map(item => item.subCategory))];
+
+            subCategories.forEach(subCat => {
+                const card = createCard(subCat, '📄', `Access ${subCat.toLowerCase()} resources`);
+                card.onclick = () => {
+                    const subCatData = data.filter(item => item.subCategory === subCat);
+                    renderLinksPage(category, subCat, subCatData);
+                    navigationStack.push('sub');
+                    updateNavigation();
+                };
+                subButtonsGrid.appendChild(card);
+            });
+
+            showPage('subButtonsPage');
+        }
+
+        // Render Links Page
+        function renderLinksPage(category, subCategory, data) {
+            const linksPage = document.getElementById('linksPage');
+            const linksPageTitle = document.getElementById('linksPageTitle');
+            const linksContainer = document.getElementById('linksContainer');
+
+            linksPageTitle.textContent = subCategory || category;
+            linksContainer.innerHTML = '';
+
+            if (data.length === 0) {
+                linksContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <div class="empty-title">No Links Found</div>
+                        <div class="empty-text">There are no links available in this section yet.</div>
+                    </div>
+                `;
+            } else {
+                data.forEach((item, index) => {
+                    const linkItem = createLinkItem(index + 1, item.linkName, item.linkUrl, item.description);
+                    linksContainer.appendChild(linkItem);
+                });
+            }
+
+            showPage('linksPage');
+        }
+
+        // Create Link Item
+        function createLinkItem(number, title, url, description) {
+            const linkItem = document.createElement('div');
+            linkItem.className = 'link-item';
+            linkItem.onclick = () => window.open(url, '_blank');
+
+            linkItem.innerHTML = `
+                <div class="link-number">${number}</div>
+                <div class="link-content">
+                    <div class="link-title">${title}</div>
+                    ${description ? `<div class="link-description">${description}</div>` : ''}
+                </div>
+            `;
+
+            return linkItem;
+        }
+
+        // Setup Search
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout;
+
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    handleSearch(e.target.value);
+                }, 300);
+            });
+        }
+
+        // Handle Search
+        function handleSearch(query) {
+            const searchResults = document.getElementById('searchResults');
+
+            if (!query.trim()) {
+                searchResults.classList.remove('active');
+                document.getElementById('homePage').classList.add('active');
+                return;
+            }
+
+            const results = allLinks.filter(item =>
+                item.category.toLowerCase().includes(query.toLowerCase()) ||
+                item.subCategory.toLowerCase().includes(query.toLowerCase()) ||
+                item.linkName.toLowerCase().includes(query.toLowerCase()) ||
+                item.description.toLowerCase().includes(query.toLowerCase())
+            );
+
+            displaySearchResults(results, query);
+        }
+
+        // Display Search Results
+        function displaySearchResults(results, query) {
+            const searchResults = document.getElementById('searchResults');
+
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+
+            searchResults.innerHTML = '';
+
+            if (results.length === 0) {
+                searchResults.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">🔍</div>
+                        <h2>No results found for "${query}"</h2>
+                        <p style="color: var(--text-light); margin-top: 0.5rem;">Try different keywords or check your spelling</p>
+                    </div>
+                `;
+            } else {
+                searchResults.innerHTML = `
+                    <div class="search-info">Found ${results.length} result${results.length !== 1 ? 's' : ''} for "${query}"</div>
+                `;
+
+                results.forEach((item, index) => {
+                    const linkItem = createLinkItem(index + 1, item.linkName, item.linkUrl, item.description);
+                    searchResults.appendChild(linkItem);
+                });
+            }
+
+            searchResults.classList.add('active');
+        }
+
+        // Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById('searchResults').classList.remove('active');
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function updateNavigation() {
+            const homeBtn = document.getElementById('homeBtn');
+            const backBtn = document.getElementById('backBtn');
+
+            if (navigationStack.length > 0) {
+                homeBtn.classList.add('visible');
+                backBtn.classList.add('visible');
+            } else {
+                homeBtn.classList.remove('visible');
+                backBtn.classList.remove('visible');
+            }
+        }
+
+        function goHome() {
+            navigationStack = [];
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResults').classList.remove('active');
+            showPage('homePage');
+            updateNavigation();
+        }
+
+        function goBack() {
+            if (navigationStack.length === 0) return;
+
+            const previousPage = navigationStack.pop();
+
+            if (navigationStack.length === 0) {
+                showPage('homePage');
+            } else if (previousPage === 'sub') {
+                showPage('subButtonsPage');
+            } else {
+                showPage('homePage');
+            }
+
+            updateNavigation();
+        }
+
+        // Show Error
+        function showError(message) {
+            const mainGrid = document.getElementById('mainGrid');
+            mainGrid.innerHTML = `
+                <div class="error-message" style="grid-column: 1 / -1;">
+                    <div class="error-icon">⚠️</div>
+                    <div class="error-title">Unable to Load Data</div>
+                    <div class="error-text">${message}</div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+
+</html>
